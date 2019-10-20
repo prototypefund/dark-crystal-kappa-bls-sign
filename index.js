@@ -6,6 +6,7 @@ const pull = require('pull-stream')
 const ThresholdSig = require('threshold-signatures')
 const path = require('path')
 const os = require('os')
+const queryMfr = require('./query-mfr')
 
 const LOCAL_FEED = 'local'
 const FEEDS = (dir) => path.join(dir, 'feeds')
@@ -41,6 +42,8 @@ class KappaBls {
           kappaPrivate.getSecretKey(FEEDS(this.storage), this.key, (err, secretKey) => {
             if (err) return cb(err)
             this.asymmetric.secretKey = secretKey
+
+            this.blsId = this.member.initId(this.key) // TODO: what encoding can this be
             cb()
           })
         })
@@ -49,12 +52,10 @@ class KappaBls {
   }
 
   buildIndexes (cb) {
-    this.db = level(VIEWS(this.metaDbPath))
+    this.db = level(VIEWS(this.strorage))
     this.core.use('query', Query(this.db, this.core, queryMfr))
-    this.core.ready(() => {
-      // should we do if (this.key)
-      this.indexesReady = true
-      cb()
-    })
+    this.indexesReady = true
+    if (this.key) return cb()
+    this.core.ready(cb)
   }
-
+}
