@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "is-my-json-valid": "^2.20.0",
     "kappa-core": "^4.0.1",
-    "kappa-private": "^1.0.0"
+    "kappa-private": "^1.0.0",
+    "threshold-signatures": "gitlab:dark-crystal/threshold-signatures"
   }
 }
