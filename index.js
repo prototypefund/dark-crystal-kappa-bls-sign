@@ -67,11 +67,13 @@ class KappaBls {
     this.localFeed.append(message, cb)
   }
 
-  publishId (cb) {
+  publishId (name, cb) {
+    if (typeof name === 'function' && !cb) return this.publishId(null, name)
     if (!this.key) return cb(new Error('no key, call ready()'))
     this.publishMessage({
       type: 'id',
-      id: this.blsId
+      id: this.blsId,
+      name
     }, cb)
   }
 }
