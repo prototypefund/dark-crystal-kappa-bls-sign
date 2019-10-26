@@ -76,4 +76,21 @@ class KappaBls {
       name
     }, cb)
   }
+
+  queryIds (cb) {
+    pull(
+      this.query([{ $filter: { value: { type: 'id' } } }]),
+      pull.filter(msg => isId(msg.value)),
+      pull.drain((idMsg) => {
+        // idMsg.value.id
+      }, cb)
+    )
+  }
+  
+  query (query, opts = {}) {
+    if (!this.indexesReady) throw new Error('Indexes not ready, run buildIndexes')
+    return pull(
+      this.core.api.query.read(Object.assign(opts, { live: false, reverse: true, query }))
+    )
+  }
 }
