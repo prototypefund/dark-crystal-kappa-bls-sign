@@ -12,6 +12,8 @@ const LOCAL_FEED = 'local'
 const FEEDS = (dir) => path.join(dir, 'feeds')
 const VIEWS = (dir) => path.join(dir, 'views')
 const STORAGE = '.kappa-bls'
+const VERSION = '1.0.0'
+
 
 class KappaBls {
   constructor (threshold, numMembers, opts = {}) {
@@ -57,5 +59,19 @@ class KappaBls {
     this.indexesReady = true
     if (this.key) return cb()
     this.core.ready(cb)
+  }
+
+  publishMessage (message, cb) {
+    message.version = VERSION
+    message.timestamp = date.now()
+    this.localFeed.append(message, cb)
+  }
+
+  publishId (cb) {
+    if (!this.key) return cb(new Error('no key, call ready()'))
+    this.publishMessage({
+      type: 'id',
+      id: this.blsId
+    }, cb)
   }
 }
