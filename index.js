@@ -23,6 +23,7 @@ class KappaBls {
     this.shares = {}
     this.peerNames = {}
     this.repliedTo = []
+    this.recipients = []
     this.threshold = threshold
     this.numMembers = numMembers
     this.storage = opts.storage || path.join(os.homedir(), STORAGE)
@@ -77,12 +78,29 @@ class KappaBls {
     }, cb)
   }
 
+  publishContribution (cb) {
+    try {
+      const contribution = this.member.generateContribution()
+    } catch (err) {
+      cb(err)
+    }
+    this.publishMessage({
+      type: 'vvec',
+      vvec: contribution.vvec
+    }, this.publishMessage({
+      type: 'share-contribution',
+      recipients: this.recipients,
+      shareContribution: contribution.contrib
+    }, cb))
+  }
+
   queryIds (cb) {
     pull(
       this.query([{ $filter: { value: { type: 'id' } } }]),
       pull.filter(msg => isId(msg.value)),
       pull.drain((idMsg) => {
-        // idMsg.value.id
+        if (this.recipients.indexOf(idMsg.key) < 0) this.recipients.push(idMsg.key)
+        this.member.addMember(idMsg.value.id)
       }, cb)
     )
   }
