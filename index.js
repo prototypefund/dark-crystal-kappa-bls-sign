@@ -14,6 +14,7 @@ const VIEWS = (dir) => path.join(dir, 'views')
 const STORAGE = '.kappa-bls'
 const VERSION = '1.0.0'
 
+module.exports = (threshold, numMembers, opts) => new KappaBls(threshold, numMembers, opts) 
 
 class KappaBls {
   constructor (threshold, numMembers, opts = {}) {
