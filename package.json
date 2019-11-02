@@ -13,5 +13,11 @@
     "kappa-core": "^4.0.1",
     "kappa-private": "^1.0.0",
     "threshold-signatures": "gitlab:dark-crystal/threshold-signatures"
+  },
+  "devDependencies": {
+    "tap-spec": "^5.0.0",
+    "tape": "^4.11.0",
+    "tape-plus": "^1.0.0",
+    "tmp": "^0.1.0"
   }
 }
