@@ -7,6 +7,7 @@ const ThresholdSig = require('threshold-signatures')
 const path = require('path')
 const os = require('os')
 const queryMfr = require('./query-mfr')
+const schemas = require('./schemas')
 
 const LOCAL_FEED = 'local'
 const FEEDS = (dir) => path.join(dir, 'feeds')
@@ -98,7 +99,7 @@ class KappaBls {
   queryIds (cb) {
     pull(
       this.query([{ $filter: { value: { type: 'id' } } }]),
-      pull.filter(msg => isId(msg.value)),
+      pull.filter(msg => schemas.isId(msg.value)),
       pull.drain((idMsg) => {
         if (this.recipients.indexOf(idMsg.key) < 0) this.recipients.push(idMsg.key)
         this.member.addMember(idMsg.value.id)
