@@ -6,7 +6,7 @@ const KappaBlsSign = require('../')
 
 
 describe('basic', (context) => {
-  context('key generation and signing', (assert, next) => {
+  context('key generation', (assert, next) => {
     const signer = KappaBlsSign(3, 5, { storage: tmpDir().name })
     signer.ready(() => {
       signer.publishId('George', (err) => {
