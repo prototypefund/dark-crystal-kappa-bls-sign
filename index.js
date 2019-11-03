@@ -56,7 +56,7 @@ class KappaBls {
   }
 
   buildIndexes (cb) {
-    this.db = level(VIEWS(this.strorage))
+    this.db = level(VIEWS(this.storage))
     this.core.use('query', Query(this.db, this.core, queryMfr))
     this.indexesReady = true
     if (this.key) return cb()
@@ -65,7 +65,7 @@ class KappaBls {
 
   publishMessage (message, cb) {
     message.version = VERSION
-    message.timestamp = date.now()
+    message.timestamp = Date.now()
     this.localFeed.append(message, cb)
   }
 
