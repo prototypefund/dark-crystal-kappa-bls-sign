@@ -80,20 +80,33 @@ class KappaBls {
     }, cb)
   }
 
-  publishContribution (cb) {
+  publishContribution (callback) {
     try {
       const contribution = this.member.generateContribution()
     } catch (err) {
-      cb(err)
+      return callback(err)
     }
+    const self = this
     this.publishMessage({
       type: 'vvec',
       vvec: contribution.vvec
-    }, this.publishMessage({
-      type: 'share-contribution',
-      recipients: this.recipients,
-      shareContribution: contribution.contrib
-    }, cb))
+    }, (err) => {
+      if (err) return callback(err)
+      pull(
+        pull.values(Object.keys(contribution.contrib)),
+        pull.asyncMap((recp, cb) => {
+          self.publishMessage({
+            type: 'share-contribution',
+            recipients: recp, // TODO: publish also to self? (this.blsId)
+            shareContribution: contribution.contrib[recp]
+          }, (err) => {
+            if (err) return callback(err)
+            cb()
+          })
+        }),
+        pull.collect(callback)
+      )
+    })
   }
 
   queryIds (cb) {
@@ -107,6 +120,7 @@ class KappaBls {
     )
   }
   
+
   query (query, opts = {}) {
     if (!this.indexesReady) throw new Error('Indexes not ready, run buildIndexes')
     return pull(
