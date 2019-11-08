@@ -121,12 +121,15 @@ class KappaBls {
       }, cb)
     )
   }
-  
 
   query (query, opts = {}) {
     if (!this.indexesReady) throw new Error('Indexes not ready, run buildIndexes')
     return pull(
       this.core.api.query.read(Object.assign(opts, { live: false, reverse: true, query }))
     )
+  }
+
+  replicate (opts) {
+    return this.core.replicate(opts)
   }
 }
