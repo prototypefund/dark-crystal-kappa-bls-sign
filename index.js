@@ -15,7 +15,7 @@ const VIEWS = (dir) => path.join(dir, 'views')
 const STORAGE = '.kappa-bls'
 const VERSION = '1.0.0'
 
-module.exports = (threshold, numMembers, opts) => new KappaBls(threshold, numMembers, opts) 
+module.exports = (threshold, numMembers, opts) => new KappaBls(threshold, numMembers, opts)
 
 class KappaBls {
   constructor (threshold, numMembers, opts = {}) {
@@ -39,16 +39,17 @@ class KappaBls {
   ready (cb) {
     ThresholdSig.blsInit(() => {
       this.member = ThresholdSig(this.threshold, this.numMembers)
+      const self = this
       this.core.writer(LOCAL_FEED, (err, feed) => {
         if (err) return cb(err)
         feed.ready(() => {
-          this.localFeed = feed
-          this.key = feed.key
-          kappaPrivate.getSecretKey(FEEDS(this.storage), this.key, (err, secretKey) => {
-            if (err) return cb(err)
-            this.asymmetric.secretKey = secretKey
+          self.localFeed = feed
+          self.key = feed.key
 
-            this.blsId = this.member.initId(this.key) // TODO: what encoding can this be
+          kappaPrivate.getSecretKey(FEEDS(self.storage), self.key, (err, secretKey) => {
+            if (err) return cb(err)
+            self.asymmetric.secretKey = secretKey
+            self.blsId = self.member.initId(self.key)
             cb()
           })
         })
@@ -115,6 +116,7 @@ class KappaBls {
       pull.filter(msg => schemas.isId(msg.value)),
       pull.drain((idMsg) => {
         if (this.recipients.indexOf(idMsg.key) < 0) this.recipients.push(idMsg.key)
+        console.log(this.blsId, idMsg.value.id)
         this.member.addMember(idMsg.value.id)
       }, cb)
     )
