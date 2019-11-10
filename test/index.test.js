@@ -41,11 +41,29 @@ describe('basic', (context) => {
 })
 
 function replicateArray (feeds, callback) {
-  async.each(feeds, (feed1, cb1) => {
-    async.each(feeds, (feed2, cb2) => {
-      if (feed1.key.toString('hex') === feed2.key.toString('hex')) return cb2()
-      replicate(feed1, feed2, cb2)
-    }, cb1)
+  const feedsDone = []
+  // async.eachOf(feeds, (feed, i1, cb1) => {
+  //   if (i1 === 0) return cb1()
+  //   replicate(feeds[0], feed, cb1)
+  // }, (err) => {
+  //   console.log('therekjh', err)
+  //   callback(err)
+  // })
+  async.eachOf(feeds, (feed1, i1, cb1) => {
+    feedsDone.push(i1)
+    async.eachOf(feeds, (feed2, i2, cb2) => {
+      if (i1 === i2) return cb2()
+      if (feedsDone.indexOf(i2) > -1) return cb2()
+      console.log(i1, i2)
+      replicate(feed1, feed2, (err) => {
+        if (err) return cb2(err)
+        console.log('callback reached', i1, i2)
+        return cb2()
+      })
+    }, (err) => {
+      if (err) return cb1(err)
+      cb1()
+    })
   }, (err) => {
     console.log('therekjh', err)
     callback(err)
@@ -57,9 +75,12 @@ function replicate (feed1, feed2, cb) {
   var d = feed2.replicate({ live: false })
 
   s.pipe(d).pipe(s)
-  s.on('error', cb)
+  s.on('error', (err) => {
+    console.log('rrr',err)
+    cb(err)
+  })
   s.on('end', () => {
     console.log('here end')
-    cb()
+    return cb()
   })
 }
