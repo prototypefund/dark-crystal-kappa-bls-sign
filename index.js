@@ -82,8 +82,9 @@ class KappaBls {
   }
 
   publishContribution (callback) {
+    let contribution
     try {
-      const contribution = this.member.generateContribution()
+      contribution = this.member.generateContribution()
     } catch (err) {
       return callback(err)
     }
@@ -116,8 +117,9 @@ class KappaBls {
       pull.filter(msg => schemas.isId(msg.value)),
       pull.drain((idMsg) => {
         if (this.recipients.indexOf(idMsg.key) < 0) this.recipients.push(idMsg.key)
-        console.log(this.blsId, idMsg.value.id)
+        // console.log(this.blsId, idMsg.value.id)
         this.member.addMember(idMsg.value.id)
+        console.log(Object.keys(this.member.members).length)
       }, cb)
     )
   }
