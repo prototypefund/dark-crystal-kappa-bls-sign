@@ -1,6 +1,8 @@
 const { describe } = require('tape-plus')
 const tmpDir = require('tmp').dirSync
 const async = require('async')
+const pull = require('pull-stream')
+
 
 const KappaBlsSign = require('../')
 
@@ -30,33 +32,30 @@ describe('basic', (context) => {
               })
             })
           })
+        }, (err) => {
+          assert.error(err, 'No error')
+          next()
         })
       })
-    }, (err) => {
-      assert.error(err, 'No error')
-      next()
     })
   })
 })
 
 function replicateArray (feeds, callback) {
-  async.eachOf(feeds, (feed1, i1, cb1) => {
-    async.eachOf(feeds, (feed2, i2, cb2) => {
-      if (i1 >= i2) return cb2()
-      console.log(`Calling replicate with feeds ${i1} and ${i2}`)
-      replicate(feed1, feed2, (err) => {
-        if (err) return cb2(err)
-        console.log(`Callback reached for feeds ${i1} and ${i2}`)
-        return cb2()
-      })
-    }, (err) => {
-      if (err) return cb1(err)
-      cb1()
-    })
-  }, (err) => {
-    console.log('Error!', err)
-    callback(err)
-  })
+  const combs = []
+  for (const i of feeds.keys()) {
+    for (const i2 of feeds.keys()) {
+      if (i < i2) combs.push([i, i2])
+    }
+  }
+
+  pull(
+    pull.values(combs),
+    pull.asyncMap((comb, cb) => {
+      replicate(feeds[comb[0]], feeds[comb[1]], cb)
+    }),
+    pull.collect(callback)
+  )
 }
 
 function replicate (feed1, feed2, cb) {
@@ -64,12 +63,6 @@ function replicate (feed1, feed2, cb) {
   var d = feed2.replicate({ live: false })
 
   s.pipe(d).pipe(s)
-  s.on('error', (err) => {
-    console.log('error when replicating', err)
-    cb(err)
-  })
-  s.on('end', () => {
-    console.log('one stream ended')
-    return cb()
-  })
+  s.on('error', cb)
+  s.on('end', cb)
 }
