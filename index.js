@@ -68,6 +68,9 @@ class KappaBls {
 
   publishMessage (message, cb) {
     message.version = VERSION
+    // TODO: we should not need to explicity add author
+    // the queries should give us the feedid as 'key' property
+    message.author = this.key.toString('hex')
     message.timestamp = Date.now()
     this.localFeed.append(message, cb)
   }
@@ -117,7 +120,11 @@ class KappaBls {
   query (query, opts = {}) {
     if (!this.indexesReady) throw new Error('Indexes not ready, run buildIndexes')
     return pull(
-      this.core.api.query.read(Object.assign(opts, { live: false, reverse: true, query }))
+      this.core.api.query.read(Object.assign(opts, { live: false, reverse: true, query })),
+      pull.map(a => {
+      // console.log(a)
+        return a
+      })
     )
   }
 
@@ -126,7 +133,8 @@ class KappaBls {
       this.query([{ $filter: { value: { type: 'id' } } }]),
       pull.filter(msg => schemas.isId(msg.value)),
       pull.drain((idMsg) => {
-        if (this.recipients.indexOf(idMsg.key) < 0) this.recipients.push(idMsg.key)
+        const author = idMsg.value.author // should be isMsg.key
+        if (this.recipients.indexOf(author) < 0) this.recipients.push(author)
         this.member.addMember(idMsg.value.id)
       }, callback)
     )
