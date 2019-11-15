@@ -25,7 +25,7 @@ class KappaBls {
     this.shares = {}
     this.peerNames = {}
     this.repliedTo = []
-    this.recipients = []
+    this.recipients = {}
     this.threshold = threshold
     this.numMembers = numMembers
     this.storage = opts.storage || path.join(os.homedir(), STORAGE)
@@ -101,12 +101,14 @@ class KappaBls {
       if (err) return callback(err)
       pull(
         pull.values(Object.keys(contribution.contrib)),
-        pull.asyncMap((recp, cb) => {
+        pull.asyncMap((id, cb) => {
+          const recp = this.recipients[id]
+          if (!recp) cb(new Error('No key for recipient'))
           self.publishMessage({
             type: 'share-contribution',
             id: self.blsId,
-            recipients: recp, // TODO: publish also to self? (this.blsId)
-            shareContribution: contribution.contrib[recp]
+            recipients: [recp], // TODO: publish also to self? (this.blsId)
+            shareContribution: contribution.contrib[id]
           }, (err) => {
             if (err) return callback(err)
             cb()
@@ -134,7 +136,8 @@ class KappaBls {
       pull.filter(msg => schemas.isId(msg.value)),
       pull.drain((idMsg) => {
         const author = idMsg.value.author // should be isMsg.key
-        if (this.recipients.indexOf(author) < 0) this.recipients.push(author)
+        this.recipients[idMsg.value.id] = author
+        // if (this.recipients.indexOf(author) < 0) this.recipients.push(author)
         this.member.addMember(idMsg.value.id)
       }, callback)
     )
