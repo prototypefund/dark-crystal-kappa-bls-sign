@@ -34,7 +34,17 @@ describe('basic', (context) => {
           })
         }, (err) => {
           assert.error(err, 'No error')
-          next()
+          replicateArray(signers, (err) => {
+            assert.error(err, 'No error when replicating')
+            async.each(signers, (signer, cb) => {
+              signer.queryContributions(() => {
+                cb()
+              })
+            }, (err) => {
+              assert.error(err, 'No error')
+              next()
+            })
+          })
         })
       })
     })

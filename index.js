@@ -29,6 +29,7 @@ class KappaBls {
     this.threshold = threshold
     this.numMembers = numMembers
     this.storage = opts.storage || path.join(os.homedir(), STORAGE)
+    this.isVvec = schemas.createIsVvec(threshold)
 
     this.core = kappa(
       FEEDS(this.storage),
@@ -91,6 +92,7 @@ class KappaBls {
     const self = this
     this.publishMessage({
       type: 'vvec',
+      id: self.blsId,
       vvec: contribution.vvec
     }, (err) => {
       if (err) return callback(err)
@@ -99,6 +101,7 @@ class KappaBls {
         pull.asyncMap((recp, cb) => {
           self.publishMessage({
             type: 'share-contribution',
+            id: self.blsId,
             recipients: recp, // TODO: publish also to self? (this.blsId)
             shareContribution: contribution.contrib[recp]
           }, (err) => {
@@ -111,21 +114,41 @@ class KappaBls {
     })
   }
 
-  queryIds (cb) {
+  query (query, opts = {}) {
+    if (!this.indexesReady) throw new Error('Indexes not ready, run buildIndexes')
+    return pull(
+      this.core.api.query.read(Object.assign(opts, { live: false, reverse: true, query }))
+    )
+  }
+
+  queryIds (callback) {
     pull(
       this.query([{ $filter: { value: { type: 'id' } } }]),
       pull.filter(msg => schemas.isId(msg.value)),
       pull.drain((idMsg) => {
         if (this.recipients.indexOf(idMsg.key) < 0) this.recipients.push(idMsg.key)
         this.member.addMember(idMsg.value.id)
-      }, cb)
+      }, callback)
     )
   }
 
-  query (query, opts = {}) {
-    if (!this.indexesReady) throw new Error('Indexes not ready, run buildIndexes')
-    return pull(
-      this.core.api.query.read(Object.assign(opts, { live: false, reverse: true, query }))
+  queryContributions (callback) {
+    const self = this
+    pull(
+      self.query([{ $filter: { value: { type: 'vvec' } } }]),
+      pull.filter(msg => self.isVvec(msg.value)),
+      pull.drain((vvecMsg) => {
+        self.member.storeVerificationVector(vvecMsg.value.id, vvecMsg.value.vvec)
+      }, () => {
+        pull(
+          self.query([{ $filter: { value: { type: 'share-contribution' } } }]),
+          pull.filter(msg => schemas.isShareContribution(msg.value)),
+          pull.drain((shareMsg) => {
+            console.log(shareMsg)
+            //self.member.
+          }, callback)
+        )
+      })
     )
   }
 

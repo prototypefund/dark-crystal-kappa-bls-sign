@@ -19,6 +19,7 @@
     "threshold-signatures": "gitlab:dark-crystal/threshold-signatures"
   },
   "devDependencies": {
+    "pull-stream": "^3.6.14",
     "tap-spec": "^5.0.0",
     "tape": "^4.11.0",
     "tape-plus": "^1.0.0",

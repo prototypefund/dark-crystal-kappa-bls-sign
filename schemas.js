@@ -30,7 +30,7 @@ const isId = validator({
   }
 })
 
-function createIsVvec(threshold) {
+function createIsVvec (threshold) {
   return validator({
     $schema: 'http://json-schema.org/schema#',
     type: 'object',
