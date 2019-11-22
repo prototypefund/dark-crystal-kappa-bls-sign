@@ -66,6 +66,8 @@ class KappaBls {
     this.core.ready(cb)
   }
 
+  // *** Publish Methods ***
+
   publishMessage (message, cb) {
     message.version = VERSION
     // TODO: we should not need to explicity add author
@@ -119,6 +121,24 @@ class KappaBls {
     })
   }
 
+  signMessage (message, callback) {
+    // TODO: handle message as buffer - convert to Uint8Array
+    if (typeof message === 'object') message = JSON.stringify(message)
+    // todo: get hash of message
+    const { signature } = this.member.sign(message)
+    this.publishMessage({
+      type: 'signature',
+      id: this.blsId,
+      message,
+      signature
+      // recipients: Object.values(this.recipients)
+    }, callback)
+  }
+
+
+
+  // *** Queries ***
+
   query (query, opts = {}) {
     if (!this.indexesReady) throw new Error('Indexes not ready, run buildIndexes')
     return pull(
@@ -157,6 +177,22 @@ class KappaBls {
             }
           }, callback)
         )
+      })
+    )
+  }
+
+  querySignatures (callback) {
+    const self = this
+    pull(
+      self.query([{ $filter: { value: { type: 'signature' } } }]),
+      pull.filter(msg => schemas.isSignature(msg.value)),
+      pull.drain((msg) => {
+        const { id, signature, message } = msg.value
+        self.member.recieveSignature(signature, id, message)
+      }, (err) => {
+        if (err) return callback(err)
+        console.log('verify group signatures: ', self.member.groupSignatures)
+        callback()
       })
     )
   }
