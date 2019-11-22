@@ -3,7 +3,6 @@ const tmpDir = require('tmp').dirSync
 const async = require('async')
 const pull = require('pull-stream')
 
-
 const KappaBlsSign = require('../')
 
 describe('basic', (context) => {
@@ -43,12 +42,27 @@ describe('basic', (context) => {
               })
             }, (err) => {
               assert.error(err, 'No error')
-              next()
+              testSigning(next)
             })
           })
         })
       })
     })
+
+    function testSigning (callback) {
+      const message = { content: 'dogbowl' }
+      async.each(signers.slice(0, 3), (signer, cb) => {
+        signer.signMessage(message, cb)
+      }, (err) => {
+        assert.error(err, 'no error')
+        replicateArray(signers, (err) => {
+          assert.error(err, 'No error on replicate')
+          async.each(signers, (signer, cb) => {
+            signer.querySignatures(cb)
+          }, callback)
+        })
+      })
+    }
   })
 })
 
