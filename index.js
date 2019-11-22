@@ -172,7 +172,7 @@ class KappaBls {
           pull.filter(msg => schemas.isShareContribution(msg.value)),
           pull.drain((shareMsg) => {
             const { id, shareContribution } = shareMsg.value
-            if (!self.member.recieveContribution(id, shareContribution)) {
+            if (!self.member.receiveContribution(id, shareContribution)) {
               return callback(new Error(`Unable to verify share contribution from member id ${id}`))
             }
           }, callback)
@@ -188,7 +188,7 @@ class KappaBls {
       pull.filter(msg => schemas.isSignature(msg.value)),
       pull.drain((msg) => {
         const { id, signature, message } = msg.value
-        self.member.recieveSignature(signature, id, message)
+        self.member.receiveSignature(signature, id, message)
       }, (err) => {
         if (err) return callback(err)
         console.log('verify group signatures: ', self.member.groupSignatures)
