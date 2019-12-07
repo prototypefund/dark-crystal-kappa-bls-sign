@@ -30,7 +30,6 @@ describe('basic', (context) => {
         async.each(signers, (signer, cb) => {
           signer.buildIndexes(() => {
             signer.queryIds(() => {
-              console.log(true)
               signer.publishContribution((err) => {
                 assert.error(err, 'No error on publishing contribution')
                 cb()

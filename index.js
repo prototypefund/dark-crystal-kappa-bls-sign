@@ -38,9 +38,9 @@ class KappaBls {
   }
 
   ready (cb) {
+    const self = this
     ThresholdSig.blsInit(() => {
       this.member = ThresholdSig(this.threshold, this.numMembers)
-      const self = this
       this.core.writer(LOCAL_FEED, (err, feed) => {
         if (err) return cb(err)
         feed.ready(() => {
@@ -74,6 +74,7 @@ class KappaBls {
     // the queries should give us the feedid as 'key' property
     message.author = this.key.toString('hex')
     message.timestamp = Date.now()
+    // console.log(message)
     this.localFeed.append(message, cb)
   }
 
@@ -135,8 +136,6 @@ class KappaBls {
     }, callback)
   }
 
-
-
   // *** Queries ***
 
   query (query, opts = {}) {
@@ -147,14 +146,15 @@ class KappaBls {
   }
 
   queryIds (callback) {
+    const self = this
     pull(
-      this.query([{ $filter: { value: { type: 'id' } } }]),
+      self.query([{ $filter: { value: { type: 'id' } } }]),
       pull.filter(msg => schemas.isId(msg.value)),
       pull.drain((idMsg) => {
         const author = idMsg.value.author // should be isMsg.key
-        this.recipients[idMsg.value.id] = author
+        self.recipients[idMsg.value.id] = author
         // if (this.recipients.indexOf(author) < 0) this.recipients.push(author)
-        this.member.addMember(idMsg.value.id)
+        self.member.addMember(idMsg.value.id)
       }, callback)
     )
   }
@@ -191,6 +191,7 @@ class KappaBls {
         self.member.receiveSignature(signature, id, message)
       }, (err) => {
         if (err) return callback(err)
+        // console.log(self.member.gcc)
         console.log('verify group signatures: ', self.member.groupSignatures)
         callback()
       })
