@@ -16,6 +16,7 @@ describe('basic', (context) => {
         assert.equal(signer.member.id.length, 32, 'signer id is 32 bytes')
         assert.equal(signer.member.numMembers, 5, 'numMembers is correct')
         assert.equal(signer.member.threshold, 3, 'treshold is correct')
+        assert.equal(signer.blsId, signer.member.skHex, 'bls id correct')
         signer.publishId(name, (err) => {
           assert.error(err, 'No error when publishing id')
           signers.push(signer)
