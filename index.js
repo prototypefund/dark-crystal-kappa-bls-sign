@@ -107,11 +107,13 @@ class KappaBls {
         pull.asyncMap((id, cb) => {
           const recp = self.recipients[id]
           if (!recp) cb(new Error('No key for recipient'))
+          const shareContribution = contribution.contrib[id]
+          if (!shareContribution) cb(new Error('No shareContribution for recipient'))
           self.publishMessage({
             type: 'share-contribution',
             id: self.blsId,
-            recipients: [recp], // TODO: publish also to self? (this.blsId)
-            shareContribution: contribution.contrib[id]
+            recipients: [recp], // TODO: publish also to self? (self.blsId)
+            shareContribution
           }, (err) => {
             if (err) return callback(err)
             cb()
