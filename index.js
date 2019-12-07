@@ -105,7 +105,7 @@ class KappaBls {
       pull(
         pull.values(Object.keys(contribution.contrib)),
         pull.asyncMap((id, cb) => {
-          const recp = this.recipients[id]
+          const recp = self.recipients[id]
           if (!recp) cb(new Error('No key for recipient'))
           self.publishMessage({
             type: 'share-contribution',
