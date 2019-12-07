@@ -12,6 +12,10 @@ describe('basic', (context) => {
     async.each(signerNames, (name, cb) => {
       const signer = KappaBlsSign(3, 5, { storage: tmpDir().name })
       signer.ready(() => {
+        assert.true(Buffer.isBuffer(signer.member.id), 'signer id is a buffer')
+        assert.equal(signer.member.id.length, 32, 'signer id is 32 bytes')
+        assert.equal(signer.member.numMembers, 5, 'numMembers is correct')
+        assert.equal(signer.member.threshold, 3, 'treshold is correct')
         signer.publishId(name, (err) => {
           assert.error(err, 'No error when publishing id')
           signers.push(signer)
@@ -38,6 +42,7 @@ describe('basic', (context) => {
             assert.error(err, 'No error when replicating')
             async.each(signers, (signer, cb) => {
               signer.queryContributions(() => {
+                // assert.ok(members[Object.keys(members)[1]].groupSignatures[message], 'Group signature valid')
                 cb()
               })
             }, (err) => {
