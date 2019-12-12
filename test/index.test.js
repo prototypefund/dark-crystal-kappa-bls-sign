@@ -43,7 +43,8 @@ describe('basic', (context) => {
             assert.error(err, 'No error when replicating')
             async.each(signers, (signer, cb) => {
               signer.queryContributions(() => {
-                // assert.ok(members[Object.keys(members)[1]].groupSignatures[message], 'Group signature valid')
+                assert.equal(typeof signer.member.groupPublicKeyExport, 'string', 'group public key present')
+                assert.ok(signer.member.groupSecretKeyShare, 'Group secret key share present')
                 cb()
               })
             }, (err) => {
@@ -65,6 +66,7 @@ describe('basic', (context) => {
           assert.error(err, 'No error on replicate')
           async.each(signers, (signer, cb) => {
             signer.querySignatures(cb)
+              // assert.ok(members[Object.keys(members)[1]].groupSignatures[message], 'Group signature valid')
           }, callback)
         })
       })
