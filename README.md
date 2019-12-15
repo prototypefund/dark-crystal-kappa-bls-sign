@@ -77,6 +77,13 @@ signer.querySignatures(cb)
 ```
 Query all signature messages from all group members and attempt to verify any for which the threshold is reached.
 
+### Replication
+
+```js
+const replicationStream = signer.replicate(opts)
+```
+Returns a replication stream allowing replication with peers.
+
 ## Message types:
 
 ### public:
