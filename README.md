@@ -1,6 +1,6 @@
 # kappa-bls-sign
 
-Use BLS group threshold signatures over [kappa-core](https://github.com/kappa-db/kappa-core)
+Use [BLS](https://github.com/herumi/bls-wasm) group [threshold signatures](https://gitlab.com/dark-crystal/threshold-signatures) over [kappa-core](https://github.com/kappa-db/kappa-core)
 
 ## API
 
