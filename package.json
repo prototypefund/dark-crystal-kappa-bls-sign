@@ -9,15 +9,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async": "^3.1.0",
     "is-my-json-valid": "^2.20.0",
     "kappa-core": "^4.0.1",
     "kappa-private": "^1.0.0",
-    "kappa-view-pull-query": "^1.1.0",
+    "kappa-view-pull-query": "1.1.0",
     "level": "^6.0.0",
     "memdb": "^1.3.1",
     "threshold-signatures": "gitlab:dark-crystal/threshold-signatures"
   },
   "devDependencies": {
+    "pull-stream": "^3.6.14",
     "tap-spec": "^5.0.0",
     "tape": "^4.11.0",
     "tape-plus": "^1.0.0",

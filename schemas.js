@@ -30,7 +30,7 @@ const isId = validator({
   }
 })
 
-function createIsVvec(threshold) {
+function createIsVvec (threshold) {
   return validator({
     $schema: 'http://json-schema.org/schema#',
     type: 'object',
@@ -92,17 +92,18 @@ const isSignature = validator({
     type: type('signature'),
     version,
     timestamp,
-    hashOfMessage: {
-      required: true,
-      type: 'string'
-      // TODO: regex for hex encoded sha256 (32 bytes)
-    },
+    // id?
+    // hashOfMessage: {
+    //   required: true,
+    //   type: 'string'
+    //   // TODO: regex for hex encoded sha256 (32 bytes)
+    // },
     signature: {
       required: true,
       type: 'string'
       // TODO: regex for hex encoded bls signature
-    },
-    recipients
+    }
+    // recipients
   }
 })
 // TODO: type: renewshares
